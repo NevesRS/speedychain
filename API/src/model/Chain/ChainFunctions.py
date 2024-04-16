@@ -139,3 +139,47 @@ def generateNextBlock(blockData, pubKey, previousBlock, gwPvtKey, blockContext, 
     inf = Transaction.Transaction(0, nextHash, nextTimestamp, blockData, sign, 0)
 
     return BlockHeader(nextIndex, previousBlockHash, nextTimestamp, inf, nextHash, nonce, pubKey, blockContext)
+
+
+def getLastTrIndex(block):
+    """
+    @param block - block reference 
+    @return - returns index of the last transaction
+    """
+    return block.transactions[len(block.transactions) - 1].index
+
+def getLastTimestamp(block):
+    """
+    @param block - block reference 
+    @return - returns timestamp of the last transaction
+    """
+    return block.transactions[len(block.transactions) - 1].timestamp
+
+def getLastData(block):
+    """
+    @param block - block reference 
+    @return - returns data of the last transaction
+    """
+    return block.transactions[len(block.transactions) - 1].data
+
+def getNextTransactionIndex(block):
+    """
+    @param block - block reference 
+    @return - returns the index of the next transaction
+    """
+    return block.transactions[len(block.transactions) -1].index + 1
+
+
+def getTransaction(block):
+    """
+    @param block - block reference 
+    @return - returns the block transactions
+    """
+    return block.transactions
+
+def getNextBlockIndex(block):
+    """
+    @param block - block reference 
+    @return - returns the next block index 
+    """
+    return block.index+1

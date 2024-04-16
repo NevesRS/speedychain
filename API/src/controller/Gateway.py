@@ -474,7 +474,7 @@ def isValidBlock(self, data, gatewayPublicKey, devicePublicKey, peer):
         # print("Block not found in IoT ledger")
         consensus = False
 
-    lastBlock = blockIoT.blockLedger[len(blockIoT.blockLedger) - 1]
+    lastBlock = blockIoT.blockLedger[len(blockIoT.blockLedger) - 1] # PROBLEMA?
     if newBlock.index != lastBlock.index + 1:
         # print("New blovk Index not valid")
         consensus = False
@@ -598,8 +598,7 @@ class R2ac(object):
             context = candidateTransaction[2]
             blk = ChainFunctions.findBlock(devPublicKey)
             # print("passed the blk")
-            nextInt = blk.transactions[len(
-                blk.transactions) - 1].index + 1
+            nextInt = ChainFunctions.getNextTransactionIndex(blk)
             signData = CryptoFunctions.signInfo(gwPvt, str(deviceInfo))
             # print("BBBBBBBBBBBBB passed the devinfo")
             gwTime = "{:.0f}".format(((time.time() * 1000) * 1000))
@@ -815,7 +814,7 @@ class R2ac(object):
                 if(ChainFunctions.findBlock(devPublicKey)!=False):
                     blk = ChainFunctions.findBlock(devPublicKey)
                 # print("passed the blk")
-                    nextInt = blk.transactions[len(blk.transactions) - 1].index + 1
+                    nextInt = ChainFunctions.getNextTransactionIndex(blk)
                     signData = CryptoFunctions.signInfo(gwPvt, str(deviceInfo))
                     # print("BBBBBBBBBBBBB passed the devinfo")
                     gwTime = "{:.0f}".format(((time.time() * 1000) * 1000))
@@ -953,8 +952,8 @@ class R2ac(object):
             if (ChainFunctions.findBlock(receivedDevPub) != False):
                 blk = ChainFunctions.findBlock(receivedDevPub)
                 # print("passed the blk")
-                lastTrIndex = blk.transactions[len(blk.transactions) - 1].index
-                lastTimestamp = blk.transactions[len(blk.transactions) - 1].timestamp
+                lastTrIndex = ChainFunctions.getLastTrIndex(blk)
+                lastTimestamp = ChainFunctions.getLastTimestamp(blk)
                 if(lastTrIndex >= candidateTr.index or lastTimestamp >= candidateTr.timestamp ):
                     logger.error("***********************")
                     logger.error("***Invalid Tr time or index*")
@@ -984,7 +983,7 @@ class R2ac(object):
 
                 # first Tr is a dummy generated data
                 if(len(blk.transactions)-1 > 0):
-                    lastTrDevInfo = blk.transactions[len(blk.transactions) - 1].data
+                    lastTrDevInfo = ChainFunctions.getLastData(blk)
                     lastTrDevInfo.__class__ = DeviceInfo.DeviceInfo
 
                     if(lastTrDevInfo.timestamp >= candidateDevInfo.timestamp):
@@ -1071,8 +1070,7 @@ class R2ac(object):
                     deviceInfo= candidateTransaction[1]
                     blk = ChainFunctions.findBlock(devPublicKey)
                     # print("passed the blk")
-                    nextInt = blk.transactions[len(
-                        blk.transactions) - 1].index + 1
+                    nextInt = ChainFunctions.getNextTransactionIndex(blk)
                     signData = CryptoFunctions.signInfo(gwPvt, str(deviceInfo))
                     # print("BBBBBBBBBBBBB passed the devinfo")
                     gwTime = "{:.0f}".format(((time.time() * 1000) * 1000))
@@ -1268,8 +1266,7 @@ class R2ac(object):
                     deviceInfo= candidateTransaction[1]
                     blk = ChainFunctions.findBlock(devPublicKey)
                     # print("passed the blk")
-                    nextInt = blk.transactions[len(
-                        blk.transactions) - 1].index + 1
+                    nextInt = ChainFunctions.getNextTransactionIndex(blk)
                     signData = CryptoFunctions.signInfo(gwPvt, str(deviceInfo))
                     # print("BBBBBBBBBBBBB passed the devinfo")
                     gwTime = "{:.0f}".format(((time.time() * 1000) * 1000))
@@ -1673,8 +1670,7 @@ class R2ac(object):
                 if isSigned:
                     deviceInfo = DeviceInfo.DeviceInfo(
                         signature, devTime, deviceData)
-                    nextInt = blk.transactions[len(
-                        blk.transactions) - 1].index + 1
+                    nextInt = ChainFunctions.getNextTransactionIndex(blk)
                     signData = CryptoFunctions.signInfo(gwPvt, str(deviceInfo))
                     gwTime = "{:.0f}".format(((time.time() * 1000) * 1000))
                     # code responsible to create the hash between Info nodes.
@@ -1801,8 +1797,7 @@ class R2ac(object):
                 if isSigned:
                     # print("it is signed!!!")
                     deviceInfo = DeviceInfo.DeviceInfo(signedDatabyDevice, devTime, transactionData)
-                    nextInt = blk.transactions[len(
-                        blk.transactions) - 1].index + 1
+                    nextInt = ChainFunctions.getNextTransactionIndex(blk)
                     signData = CryptoFunctions.signInfo(gwPvt, str(deviceInfo))
                     gwTime = "{:.0f}".format(((time.time() * 1000) * 1000))
                     # code responsible to create the hash between Info nodes.
@@ -1885,8 +1880,7 @@ class R2ac(object):
                     # print("it is signed!!!")
                     deviceInfo = DeviceInfo.DeviceInfo(
                         signature, devTime, deviceData)
-                    nextInt = blk.transactions[len(
-                        blk.transactions) - 1].index + 1
+                    nextInt = ChainFunctions.getNextTransactionIndex(blk)
                     signData = CryptoFunctions.signInfo(gwPvt, str(deviceInfo))
                     gwTime = "{:.0f}".format(((time.time() * 1000) * 1000))
                     # code responsible to create the hash between Info nodes.
@@ -2068,7 +2062,7 @@ class R2ac(object):
             if ((aesKey == False) or (len(aesKey) != 32)):
                 logger.error("aeskey had a problem...")
                 removeAESKey(aesKey)
-                aesKey = generateAESKey(blk.publicKey)
+                aesKey = generateAESKey(blk.publicKey) # -> Problema??
                 encKey = CryptoFunctions.encryptRSA2(devPubKey, aesKey)
                 return encKey
                 # t2 = time.time()
@@ -2376,7 +2370,7 @@ class R2ac(object):
         # logger.info("-------")
         print("Block Ledger size: " + str(size))
         print("-------")
-        for b in blk.transactions:
+        for b in blk.transactions: 
             # logger.info(b.strBlock())
             # logger.info("-------")
             print(b.strBlock())
@@ -2398,8 +2392,8 @@ class R2ac(object):
         # print ("received: "+str(blockToCalculate))
         t1 = time.time()
         blk = ChainFunctions.getBlockByIndex(blockToCalculate)
-        trans = blk.transactions
-        size = len(blk.transactions)
+        trans = ChainFunctions.getTransaction(blk)
+        size = len(trans)
         mt = merkle.MerkleTools()
         mt.add_leaf(trans, True)
         mt.make_tree()
@@ -3343,7 +3337,7 @@ def verifyBlockCandidate(newBlock, generatorGwPub, generatorDevicePub, alivePeer
         # logger.debug("newBlock-previousHash="+str(newBlock.previousHash))
         blockValidation = False
         return blockValidation
-    if (int(lastBlk.index+1) != int(newBlock.index)):
+    if (int(ChainFunctions.getNextBlockIndex(lastBlk)) != int(newBlock.index)):
         # print("validation lastblkindex")
         logger.error("Failed to validate new block(" +
                         str(newBlock.index)+") INDEX value")
